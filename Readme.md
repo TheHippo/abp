@@ -1,4 +1,6 @@
-# AveragedBufferPool [![GoDoc](https://godoc.org/github.com/TheHippo/abp?status.png)](https://godoc.org/github.com/TheHippo/abp) [![Build Status](https://travis-ci.org/TheHippo/abp.svg?branch=master)](https://travis-ci.org/TheHippo/abp) [![Build Status](https://drone.io/github.com/TheHippo/abp/status.png)](https://drone.io/github.com/TheHippo/abp/latest) [![Coverage Status](https://coveralls.io/repos/TheHippo/abp/badge.svg?branch=master&service=github)](https://coveralls.io/github/TheHippo/abp?branch=master)
+# AveragedBufferPool 
+
+[![GoDoc](https://godoc.org/github.com/TheHippo/abp?status.png)](https://godoc.org/github.com/TheHippo/abp) [![Build Status](https://travis-ci.org/TheHippo/abp.svg?branch=master)](https://travis-ci.org/TheHippo/abp) [![Build Status](https://drone.io/github.com/TheHippo/abp/status.png)](https://drone.io/github.com/TheHippo/abp/latest) [![Coverage Status](https://coveralls.io/repos/TheHippo/abp/badge.svg?branch=master&service=github)](https://coveralls.io/github/TheHippo/abp?branch=master)
 
 `abp` implements a buffer pool based on fixed sized channels aka [leaky buffers](http://golang.org/doc/effective_go.html#leaky_buffer).
 
