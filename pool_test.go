@@ -146,3 +146,63 @@ func TestCap(t *testing.T) {
 	}
 
 }
+
+func benchmarkSimplePool(i int, b *testing.B) {
+	backlog := 1000
+	expected := 5
+	overflow := 1.0
+
+	content := []byte("01234567890123456789")
+	p := NewAveragedBufferPool(i, backlog, expected, overflow)
+	defer p.Close()
+
+	for j := 0; j < b.N; j++ {
+		buf := p.Get()
+		buf.Write(content)
+		_ = buf.String()
+		p.Put(buf)
+	}
+}
+
+func BenchmarkSimplePool100(b *testing.B) {
+	benchmarkSimplePool(100, b)
+}
+
+func BenchmarkSimplePool1000(b *testing.B) {
+	benchmarkSimplePool(1000, b)
+}
+
+func BenchmarkSimplePool10000(b *testing.B) {
+	benchmarkSimplePool(10000, b)
+}
+
+func benchmarkParallelPool(i int, b *testing.B) {
+	backlog := 1000
+	expected := 5
+	overflow := 1.0
+
+	content := []byte("01234567890123456789")
+	p := NewAveragedBufferPool(i, backlog, expected, overflow)
+	defer p.Close()
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			buf := p.Get()
+			buf.Write(content)
+			_ = buf.String()
+			p.Put(buf)
+		}
+	})
+}
+
+func BenchmarkParallelPool100(b *testing.B) {
+	benchmarkParallelPool(100, b)
+}
+
+func BenchmarkParallelPool1000(b *testing.B) {
+	benchmarkParallelPool(1000, b)
+}
+
+func BenchmarkParallelPool10000(b *testing.B) {
+	benchmarkParallelPool(10000, b)
+}
