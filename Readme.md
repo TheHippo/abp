@@ -1,8 +1,8 @@
-# AveragedBufferPool [![GoDoc](https://godoc.org/github.com/TheHippo/abp?status.png)](https://godoc.org/github.com/TheHippo/abp) [![Build Status](https://travis-ci.org/TheHippo/apb.svg?branch=master)](https://travis-ci.org/TheHippo/apb)
+# AveragedBufferPool [![GoDoc](https://godoc.org/github.com/TheHippo/abp?status.png)](https://godoc.org/github.com/TheHippo/abp) [![Build Status](https://travis-ci.org/TheHippo/abp.svg?branch=master)](https://travis-ci.org/TheHippo/abp)
 
 ## Installation
 
-`go get github.com/TheHippo/apb`
+`go get github.com/TheHippo/abp`
 
 ## Documentation
 
