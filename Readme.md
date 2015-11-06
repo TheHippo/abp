@@ -25,6 +25,23 @@ pool.Put(buf)
 pool.Close()
 ```
 
+### Benchmark
+
+```
+BenchmarkSimplePool100-4         1000000          1245 ns/op           0 B/op          0 allocs/op
+BenchmarkSimplePool1000-4        1000000          1299 ns/op           0 B/op          0 allocs/op
+BenchmarkSimplePool10000-4       1000000          1296 ns/op           0 B/op          0 allocs/op
+BenchmarkParallelPool100-4       1000000          1588 ns/op           0 B/op          0 allocs/op
+BenchmarkParallelPool1000-4      1000000          1433 ns/op           0 B/op          0 allocs/op
+BenchmarkParallelPool10000-4     1000000          1526 ns/op           0 B/op          0 allocs/op
+BenchmarkMove1000-4             200000000            6.02 ns/op        0 B/op          0 allocs/op
+BenchmarkMove10000-4            200000000            6.14 ns/op        0 B/op          0 allocs/op
+BenchmarkMoveFull1000-4         300000000            5.56 ns/op        0 B/op          0 allocs/op
+BenchmarkMoveFull10000-4        300000000            5.25 ns/op        0 B/op          0 allocs/op
+BenchmarkMoveAndSet1000-4       200000000            6.07 ns/op        0 B/op          0 allocs/op
+BenchmarkMoveAndSet10000-4      200000000            6.19 ns/op        0 B/op          0 allocs/op
+```
+
 ## License
 
 See `License` file
