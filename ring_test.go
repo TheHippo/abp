@@ -4,14 +4,6 @@ import (
 	"testing"
 )
 
-func TestRingSize(t *testing.T) {
-	size := 10
-	r := newRing(size)
-	if r.Len() != size {
-		t.Errorf("Length should be %d but was %d.", size, r.Len())
-	}
-}
-
 func TestNegativeSize(t *testing.T) {
 	r := newRing(-1)
 	if r != nil {

@@ -23,18 +23,10 @@ func newRing(size int) *ring {
 	return r
 }
 
-func (r *ring) Len() int {
-	n := 0
-	if r != nil {
-		n++
-		for p := r.next; p != r; p = p.next {
-			n++
-		}
+func (r *ring) move(n int) *ring {
+	if r == nil {
+		return nil
 	}
-	return n
-}
-
-func (r *ring) Move(n int) *ring {
 	switch {
 	case n < 0:
 		for ; n < 0; n++ {
