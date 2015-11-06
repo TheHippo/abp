@@ -52,7 +52,7 @@ func TestPoolAverage(t *testing.T) {
 
 	cs := p.currentSum
 	if cs != expected*backlog {
-		t.Errorf("Expected current sum to be %d but was %s", expected*backlog, cs)
+		t.Errorf("Expected current sum to be %d but was %d", expected*backlog, cs)
 	}
 
 	for i := 0; i < backlog; i++ {
