@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// AveragedBufferPool implements a pool of bytes.Buffer. Buffers are
+// preallocated to the average size of the returned buffers.
 type AveragedBufferPool struct {
 	currentAverage int
 	max            int
@@ -18,6 +20,18 @@ type AveragedBufferPool struct {
 	lock           sync.RWMutex
 }
 
+// NewAveragedBufferPool creates a new buffer pool.
+//
+// - size will be used as the size of the buffer.
+//
+// - backlog is the size of the ring that will be used for calculating the average.
+// A larger ring will not affect the time it takes to calculate the average
+//
+// - expectedSize will be the size of the first buffers returned by the pool until an actuall average has
+// been calculated.
+//
+// - overflow is the factor until a larger then average buffer will be accepted. E.g. when average
+// size is 100 and overflow is 1.2 buffers up to 120 will be accepted and reused.
 func NewAveragedBufferPool(size, backlog, expectedSize int, overflow float64) *AveragedBufferPool {
 	r := newRing(backlog)
 	for i := 0; i < backlog; i++ {
@@ -39,6 +53,7 @@ func NewAveragedBufferPool(size, backlog, expectedSize int, overflow float64) *A
 	return abp
 }
 
+// Close end the pools goroutine that calculates the average size.
 func (abp *AveragedBufferPool) Close() {
 	close(abp.closeCalc)
 }
@@ -62,6 +77,7 @@ func (abp *AveragedBufferPool) calc() {
 	}
 }
 
+// Get returns reusable buffer or pre-allocates a new one
 func (abp *AveragedBufferPool) Get() *bytes.Buffer {
 	select {
 	case b := <-abp.bufferChannel:
@@ -74,6 +90,7 @@ func (abp *AveragedBufferPool) Get() *bytes.Buffer {
 	}
 }
 
+// Put returns a buffer that is not longer used to the pool
 func (abp *AveragedBufferPool) Put(buf *bytes.Buffer) {
 	// rewind buffer to start
 	buf.Reset()
