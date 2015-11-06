@@ -10,7 +10,7 @@ func newRing(size int) *ring {
 		return nil
 	}
 
-	r := new(ring)
+	r := &ring{}
 	p := r
 	for i := 1; i < size; i++ {
 		p.next = &ring{
@@ -21,6 +21,17 @@ func newRing(size int) *ring {
 	p.next = r
 	r.prev = p
 	return r
+}
+
+func (r *ring) len() int {
+	n := 0
+	if r != nil {
+		n = 1
+		for p := r.next; p != r; p = p.next {
+			n++
+		}
+	}
+	return n
 }
 
 func (r *ring) move(n int) *ring {
@@ -39,3 +50,15 @@ func (r *ring) move(n int) *ring {
 	}
 	return r
 }
+
+// func (r *ring) String() string {
+// 	buf := bytes.NewBuffer(nil)
+// 	n := r.len()
+// 	buf.WriteString(fmt.Sprintf("[%d] ", n))
+// 	p := r
+// 	for ; n > 0; n-- {
+// 		buf.WriteString(fmt.Sprintf("%d, ", p.value))
+// 		p = p.move(1)
+// 	}
+// 	return buf.String()
+// }

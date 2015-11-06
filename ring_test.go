@@ -9,6 +9,10 @@ func TestNegativeSize(t *testing.T) {
 	if r != nil {
 		t.Errorf("Ring should be nil but was %v", r)
 	}
+
+	if r.move(1) != nil {
+		t.Errorf("Empty ring should not move")
+	}
 }
 
 func TestMove(t *testing.T) {
@@ -24,6 +28,13 @@ func TestMove(t *testing.T) {
 	r = r.move(-1)
 	if r.value != 3 {
 		t.Errorf("Ring values should be 3 but was %d", r.value)
+	}
+}
+
+func TestLen(t *testing.T) {
+	r := newRing(5)
+	if r.len() != 5 {
+		t.Errorf("Ring length should be %d but was %d", r.len(), 5)
 	}
 }
 

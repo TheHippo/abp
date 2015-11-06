@@ -2,45 +2,38 @@ package abp
 
 import (
 	"bytes"
-	"sync/atomic"
+	"sync"
 )
 
 type AveragedBufferPool struct {
-	currentAverage *int64
-	max            *int64
+	currentAverage int
+	max            int
 	backlog        int
 	currentSum     int
-	overflow       float32
+	overflow       float64
 	ring           *ring
 	bufferChannel  chan *bytes.Buffer
 	calcChannel    chan int
 	closeCalc      chan struct{}
+	lock           sync.RWMutex
 }
 
-type int64Wrapper struct {
-	x int64
-}
-
-func NewAveragedBufferPool(size, backlog, expectedSize int, overflow float32) *AveragedBufferPool {
+func NewAveragedBufferPool(size, backlog, expectedSize int, overflow float64) *AveragedBufferPool {
 	r := newRing(backlog)
 	for i := 0; i < backlog; i++ {
 		r.value = expectedSize
 		r = r.move(1)
 	}
 	abp := &AveragedBufferPool{
-		backlog:    backlog,
-		currentSum: backlog * expectedSize,
-		currentAverage: &(&int64Wrapper{
-			x: int64(expectedSize),
-		}).x,
-		max: &(&int64Wrapper{
-			x: int64(float32(expectedSize) * overflow),
-		}).x,
-		overflow:      overflow,
-		ring:          r,
-		bufferChannel: make(chan *bytes.Buffer, size),
-		calcChannel:   make(chan int),
-		closeCalc:     make(chan struct{}),
+		backlog:        backlog,
+		currentSum:     backlog * expectedSize,
+		currentAverage: expectedSize,
+		max:            int(float64(expectedSize) * overflow),
+		overflow:       overflow,
+		ring:           r,
+		bufferChannel:  make(chan *bytes.Buffer, size),
+		calcChannel:    make(chan int),
+		closeCalc:      make(chan struct{}),
 	}
 	go abp.calc()
 	return abp
@@ -57,15 +50,14 @@ func (abp *AveragedBufferPool) calc() {
 			return
 		case lastSize := <-abp.calcChannel:
 			// update current sum, write new value to ring
+			abp.lock.Lock()
 			abp.currentSum -= abp.ring.value
 			abp.currentSum += lastSize
 			abp.ring.value = lastSize
-			abp.ring.move(1)
-
-			// calculate average and max
-			ca := int64(abp.currentSum / abp.backlog)
-			atomic.StoreInt64(abp.currentAverage, ca)
-			atomic.StoreInt64(abp.max, int64(float32(ca)+abp.overflow))
+			abp.ring = abp.ring.move(1)
+			abp.currentAverage = abp.currentSum / abp.backlog
+			abp.max = int(float64(abp.currentAverage) * abp.overflow)
+			abp.lock.Unlock()
 		}
 	}
 }
@@ -75,7 +67,10 @@ func (abp *AveragedBufferPool) Get() *bytes.Buffer {
 	case b := <-abp.bufferChannel:
 		return b
 	default:
-		return bytes.NewBuffer(make([]byte, 0, atomic.LoadInt64(abp.currentAverage)))
+		abp.lock.RLock()
+		buf := bytes.NewBuffer(make([]byte, 0, abp.currentAverage))
+		abp.lock.RUnlock()
+		return buf
 	}
 }
 
@@ -85,10 +80,14 @@ func (abp *AveragedBufferPool) Put(buf *bytes.Buffer) {
 
 	capacity := cap(buf.Bytes())
 
-	if int64(capacity) > atomic.LoadInt64(abp.max) {
+	abp.lock.RLock()
+
+	if capacity > abp.max {
 		// buffer was larger the average. create new one
-		buf = bytes.NewBuffer(make([]byte, 0, atomic.LoadInt64(abp.currentAverage)))
+		buf = bytes.NewBuffer(make([]byte, 0, abp.currentAverage))
 	}
+
+	abp.lock.RUnlock()
 
 	select {
 	case abp.bufferChannel <- buf:
